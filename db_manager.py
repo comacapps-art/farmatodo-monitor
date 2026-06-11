@@ -30,7 +30,19 @@ def get_product_price(sku):
         return doc.to_dict().get('price_val', 0)
     return 0
 
-def update_product_and_history(sku, product_data, current_price_val, old_price_val, now_str):
+def get_product_info(sku):
+    db = get_db()
+    if not db: return {'price_val': 0, 'last_checked': ''}
+    doc = db.collection('products').document(sku).get()
+    if doc.exists:
+        data = doc.to_dict()
+        return {
+            'price_val': data.get('price_val', 0),
+            'last_checked': data.get('last_checked', '')
+        }
+    return {'price_val': 0, 'last_checked': ''}
+
+def update_product_and_history(sku, product_data, current_price_val, old_price_val, old_timestamp, now_str):
     db = get_db()
     if not db: return False
     
@@ -47,6 +59,8 @@ def update_product_and_history(sku, product_data, current_price_val, old_price_v
     # Save history
     db.collection('price_history').add({
         'sku': sku,
+        'title': product_data.get('Title', ''),
+        'brand': product_data.get('Brand', ''),
         'price_val': current_price_val,
         'timestamp': now_str
     })
@@ -60,6 +74,7 @@ def update_product_and_history(sku, product_data, current_price_val, old_price_v
         # Save alert
         alert_data = {
             'timestamp': now_str,
+            'old_timestamp': old_timestamp,
             'sku': sku,
             'title': product_data.get('Title'),
             'old_price': old_price_val,

@@ -162,7 +162,10 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="alert-item">
                   ${a.image ? `<img src="${a.image}">` : '<div style="width:40px;height:40px;background:#eee;"></div>'}
                   <div class="details">
-                      <div style="font-size:12px; color:#64748b;">${a.timestamp} | SKU: ${a.sku}</div>
+                      <div style="font-size:12px; color:#64748b;">
+                          <b>Anterior:</b> ${a.old_timestamp || 'Desconocido'} | <b>Nuevo:</b> ${a.timestamp}
+                      </div>
+                      <div style="font-size:11px; color:#94a3b8; margin-bottom: 2px;">SKU: ${a.sku}</div>
                       <div style="font-weight:600;">${a.title}</div>
                   </div>
                   <div class="price-change ${colorClass}">
@@ -268,13 +271,15 @@ document.addEventListener('DOMContentLoaded', () => {
                   historyTableBody.innerHTML += `
                       <tr style="border-bottom:1px solid #f1f5f9;">
                           <td style="padding:10px;">${item.timestamp}</td>
+                          <td style="padding:10px;">${item.brand || ''}</td>
+                          <td style="padding:10px;">${item.title || ''}</td>
                           <td style="padding:10px; font-weight:600;">${item.sku}</td>
                           <td style="padding:10px; color:#10b981; font-weight:bold;">${item.price_val}</td>
                       </tr>
                   `;
               });
           } else {
-              historyTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">No hay historial aún.</td></tr>';
+              historyTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">No hay historial aún.</td></tr>';
           }
       } catch (e) {
           console.error("Error loading history", e);
@@ -290,10 +295,10 @@ document.addEventListener('DOMContentLoaded', () => {
           
           // Crear CSV
           let csvContent = "data:text/csv;charset=utf-8,";
-          csvContent += "Fecha/Hora,SKU,Precio_Bs\n";
+          csvContent += "Fecha/Hora,Marca,Producto,SKU,Precio_Bs\n";
           
           fullHistoryData.forEach(row => {
-              csvContent += `"${row.timestamp}","${row.sku}","${row.price_val}"\n`;
+              csvContent += `"${row.timestamp}","${row.brand || ''}","${row.title || ''}","${row.sku}","${row.price_val}"\n`;
           });
           
           const encodedUri = encodeURI(csvContent);

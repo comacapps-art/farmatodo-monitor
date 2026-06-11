@@ -50,10 +50,12 @@ def _monitor_loop():
                 except:
                     continue
                     
-                old_price_val = db_manager.get_product_price(sku)
+                old_info = db_manager.get_product_info(sku)
+                old_price_val = old_info['price_val']
+                old_timestamp = old_info['last_checked']
                 
                 changed = db_manager.update_product_and_history(
-                    sku, p, current_price_val, old_price_val, now_str
+                    sku, p, current_price_val, old_price_val, old_timestamp, now_str
                 )
                 
                 if changed:
