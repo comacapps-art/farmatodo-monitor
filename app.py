@@ -18,12 +18,39 @@ def scrape():
         return jsonify({'error': 'La búsqueda no puede estar vacía'}), 400
         
     try:
+        # Fetch BCV rate
+        bcv_rate = 0.0
+        try:
+            import requests
+            res = requests.get('https://ve.dolarapi.com/v1/dolares/oficial', timeout=5)
+            if res.status_code == 200:
+                bcv_rate = float(res.json().get('promedio', 0))
+        except:
+            pass
+            
         # Run the scraper in headless mode for the server
         products, output_file = scraper.scrape_farmatodo(url, headless=True)
+        
+        # Add USD price to products
+        for p in products:
+            try:
+                import re
+                price_str = str(p.get('Price', ''))
+                digits = re.sub(r'[^\d]', '', price_str)
+                if digits and bcv_rate > 0:
+                    price_bs = float(digits) / 100.0
+                    p['Price_USD'] = round(price_bs / bcv_rate, 2)
+                else:
+                    p['Price_USD'] = 0
+            except:
+                p['Price_USD'] = 0
+            p['BCV_Rate'] = bcv_rate
+            
         return jsonify({
             'message': 'Scraping completado', 
             'products': products,
-            'download_file': output_file
+            'download_file': output_file,
+            'bcv_rate': bcv_rate
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -106,6 +133,15 @@ def remove_watchlist():
         return jsonify({'error': 'Falta el ID'}), 400
     db_manager.remove_watchlist_item(doc_id)
     return jsonify({'status': 'ok'})
+
+@app.route('/api/dashboard', methods=['GET'])
+def get_dashboard():
+    try:
+        return jsonify({
+            'dashboard': db_manager.get_dashboard_data()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 import os
 if __name__ == '__main__':

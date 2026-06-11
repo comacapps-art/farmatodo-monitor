@@ -48,6 +48,8 @@ def update_product_and_history(sku, product_data, current_price_bs, current_pric
     db.collection('products').document(sku).set({
         'price_val': current_price_bs,
         'price_usd': current_price_usd,
+        'old_price_usd': old_price_usd,
+        'old_timestamp': old_timestamp,
         'bcv_rate': bcv_rate,
         'last_checked': now_str,
         'title': product_data.get('Title', ''),
@@ -142,3 +144,16 @@ def remove_watchlist_item(doc_id):
     
     db.collection('watchlist').document(doc_id).delete()
     return True
+
+def get_dashboard_data():
+    db = get_db()
+    if not db: return []
+    
+    # Obtener todos los productos vigilados
+    docs = db.collection('products').order_by('last_checked', direction=firestore.Query.DESCENDING).stream()
+    dashboard = []
+    for doc in docs:
+        data = doc.to_dict()
+        data['sku'] = doc.id
+        dashboard.append(data)
+    return dashboard

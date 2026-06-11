@@ -45,6 +45,7 @@
       <button class="tab" data-tab="alerts">
         🔔 Alertas <span id="alertBadge" class="badge-count" style="display:none">0</span>
       </button>
+      <button class="tab" data-tab="dashboard">📺 Dashboard TV</button>
       <button class="tab" data-tab="history">🕒 Historial</button>
     </div>
 
@@ -110,6 +111,32 @@
       </div>
     </div>
 
+    <!-- TAB: DASHBOARD -->
+    <div id="tab-dashboard" class="tab-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+        <h3 style="font-size:14px; color:#475569; margin:0;">📺 MONITOR EN VIVO (MERCADO GENERAL)</h3>
+        <span style="font-size:12px; color:#10b981; font-weight:bold;">🟢 Auto-Refresh 60s</span>
+      </div>
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; max-height:600px; overflow-y:auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size:13px;">
+          <thead style="background:#f8fafc; position:sticky; top:0; z-index:1;">
+            <tr>
+              <th style="padding: 10px; border-bottom:1px solid #e2e8f0;">Imagen</th>
+              <th style="padding: 10px; border-bottom:1px solid #e2e8f0;">Marca</th>
+              <th style="padding: 10px; border-bottom:1px solid #e2e8f0;">Producto</th>
+              <th style="padding: 10px; border-bottom:1px solid #e2e8f0;">SKU</th>
+              <th style="padding: 10px; border-bottom:1px solid #e2e8f0;">USD Anterior</th>
+              <th style="padding: 10px; border-bottom:1px solid #e2e8f0;">USD Actual</th>
+              <th style="padding: 10px; border-bottom:1px solid #e2e8f0;">Última Revisión</th>
+            </tr>
+          </thead>
+          <tbody id="dashboardTableBody">
+            <tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">Cargando mercado...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- TAB: HISTORIAL -->
     <div id="tab-history" class="tab-panel">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
@@ -163,7 +190,9 @@
           <th style="padding: 10px;">Marca</th>
           <th style="padding: 10px;">Producto</th>
           <th style="padding: 10px;">SKU</th>
-          <th style="padding: 10px;">Precio</th>
+          <th style="padding: 10px;">Precio (Bs)</th>
+          <th style="padding: 10px;">Precio (USD)</th>
+          <th style="padding: 10px;">Tasa BCV</th>
           <th style="padding: 10px;">Antes</th>
           <th style="padding: 10px;">Desc.</th>
           <th style="padding: 10px;">Enlace</th>

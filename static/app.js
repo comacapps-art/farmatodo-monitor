@@ -58,8 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   <td>${p.Title || '-'}</td>
                   <td><strong>${p.SKU || '-'}</strong></td>
                   <td style="color:#10b981; font-weight:bold;">${p.Price || '-'}</td>
-                  <td style="text-decoration: line-through; color: #999; font-size: 12px;">${p.OldPrice || '-'}</td>
-                  <td style="color: #ef4444; font-size: 12px; font-weight:bold;">${p.Discount || '-'}</td>
+                  <td style="color:#3b82f6; font-weight:bold;">$${p.Price_USD || 0}</td>
+                  <td style="color:#64748b;">Bs ${p.BCV_Rate || data.bcv_rate || '-'}</td>
+                  <td style="color:#ef4444; text-decoration:line-through; font-size:12px;">${p.OldPrice || '-'}</td>
+                  <td style="color:#f59e0b; font-weight:bold;">${p.Discount || '-'}</td>
                   <td>${p.Link ? `<a href="${p.Link}" target="_blank">Abrir</a>` : '-'}</td>
                 `;
                 tableBody.appendChild(tr);
@@ -309,7 +311,59 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
+  // --- DASHBOARD LOGIC ---
+  const dashboardTableBody = document.getElementById('dashboardTableBody');
+
+  async function loadDashboard() {
+      try {
+          const res = await fetch('/api/dashboard');
+          const data = await res.json();
+          dashboardTableBody.innerHTML = '';
+          
+          if (data.dashboard && data.dashboard.length > 0) {
+              data.dashboard.forEach(item => {
+                  const currentUSD = item.price_usd || 0;
+                  const oldUSD = item.old_price_usd || currentUSD;
+                  
+                  let changeColor = 'inherit';
+                  let icon = '';
+                  if (currentUSD > oldUSD) {
+                      changeColor = '#ef4444'; // Red
+                      icon = '📈';
+                  } else if (currentUSD < oldUSD) {
+                      changeColor = '#10b981'; // Green
+                      icon = '📉';
+                  }
+
+                  dashboardTableBody.innerHTML += `
+                      <tr style="border-bottom:1px solid #f1f5f9;">
+                          <td style="padding:10px;">${item.image ? `<img src="${item.image}" width="30" style="border-radius:4px;">` : '-'}</td>
+                          <td style="padding:10px; font-weight:600;">${item.brand || '-'}</td>
+                          <td style="padding:10px;">${item.title || '-'}</td>
+                          <td style="padding:10px; font-size:11px; color:#64748b;">${item.sku}</td>
+                          <td style="padding:10px; color:#64748b;">$${oldUSD}</td>
+                          <td style="padding:10px; font-weight:bold; font-size:14px; color:${changeColor};">${icon} $${currentUSD}</td>
+                          <td style="padding:10px; font-size:12px; color:#94a3b8;">${item.last_checked || '-'}</td>
+                      </tr>
+                  `;
+              });
+          } else {
+              dashboardTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">El mercado está vacío. Inicia una búsqueda o agrega items a tu watchlist.</td></tr>';
+          }
+      } catch (e) {
+          console.error("Error loading dashboard", e);
+      }
+  }
+
+  // Auto-refresh Dashboard every 60 seconds
+  setInterval(() => {
+      loadDashboard();
+      loadHistory();
+      fetchAlerts();
+  }, 60000);
+
   // Load data on start
   loadWatchlist();
   loadHistory();
+  loadDashboard();
 });
