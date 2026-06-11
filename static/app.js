@@ -165,11 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
                       <div style="font-size:12px; color:#64748b;">
                           <b>Anterior:</b> ${a.old_timestamp || 'Desconocido'} | <b>Nuevo:</b> ${a.timestamp}
                       </div>
-                      <div style="font-size:11px; color:#94a3b8; margin-bottom: 2px;">SKU: ${a.sku}</div>
+                      <div style="font-size:11px; color:#94a3b8; margin-bottom: 2px;">SKU: ${a.sku} | BCV: Bs ${a.bcv_rate || '-'}</div>
                       <div style="font-weight:600;">${a.title}</div>
                   </div>
                   <div class="price-change ${colorClass}">
-                      ${icon} ${a.old_price} -> ${a.new_price}
+                      ${icon} $${a.old_price} -> $${a.new_price}
                   </div>
               </div>
           `;
@@ -183,10 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
           rows.forEach(tr => {
               const skuCell = tr.children[5]; // SKU is 6th column
               if (skuCell && skuCell.innerText.trim() === a.sku) {
-                  // Update price cell
-                  const priceCell = tr.children[6];
-                  priceCell.innerText = a.new_price;
-                  
                   // Apply animation
                   const animClass = a.direction === 'up' ? 'blink-up' : 'blink-down';
                   tr.classList.remove('blink-up', 'blink-down');
@@ -274,12 +270,14 @@ document.addEventListener('DOMContentLoaded', () => {
                           <td style="padding:10px;">${item.brand || ''}</td>
                           <td style="padding:10px;">${item.title || ''}</td>
                           <td style="padding:10px; font-weight:600;">${item.sku}</td>
-                          <td style="padding:10px; color:#10b981; font-weight:bold;">${item.price_val}</td>
+                          <td style="padding:10px; color:#10b981; font-weight:bold;">${item.price_val || 0}</td>
+                          <td style="padding:10px; color:#3b82f6; font-weight:bold;">$${item.price_usd || 0}</td>
+                          <td style="padding:10px; color:#64748b;">${item.bcv_rate || '-'}</td>
                       </tr>
                   `;
               });
           } else {
-              historyTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">No hay historial aún.</td></tr>';
+              historyTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">No hay historial aún.</td></tr>';
           }
       } catch (e) {
           console.error("Error loading history", e);
@@ -295,10 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
           
           // Crear CSV
           let csvContent = "data:text/csv;charset=utf-8,";
-          csvContent += "Fecha/Hora,Marca,Producto,SKU,Precio_Bs\n";
+          csvContent += "Fecha/Hora,Marca,Producto,SKU,Precio_Bs,Precio_USD,Tasa_BCV\n";
           
           fullHistoryData.forEach(row => {
-              csvContent += `"${row.timestamp}","${row.brand || ''}","${row.title || ''}","${row.sku}","${row.price_val}"\n`;
+              csvContent += `"${row.timestamp}","${row.brand || ''}","${row.title || ''}","${row.sku}","${row.price_val || 0}","${row.price_usd || 0}","${row.bcv_rate || ''}"\n`;
           });
           
           const encodedUri = encodeURI(csvContent);
