@@ -53,58 +53,42 @@ def scrape_farmatodo(query: str, headless: bool = False):
                 except Exception as e:
                     pass
 
-            # Extract currently visible products
-            cards = page.locator('.product-card').all()
-            for card in cards:
-                try:
-                    title_loc = card.locator('.product-card__title')
-                    title = title_loc.inner_text().strip() if title_loc.count() > 0 else ""
-                    
-                    brand_loc = card.locator('.product-card__brand')
-                    brand = brand_loc.inner_text().strip() if brand_loc.count() > 0 else ""
-                    
-                    price_loc = card.locator('.product-card__price-value')
-                    price = price_loc.inner_text().strip() if price_loc.count() > 0 else ""
-                    
-                    # Extract link and SKU
-                    link_loc = card.locator('.product-card__info-link')
-                    link = ""
-                    sku = ""
-                    if link_loc.count() > 0:
-                        href = link_loc.first.get_attribute('href')
-                        if href:
-                            link = f"https://www.farmatodo.com.ve{href}"
-                            try:
-                                sku = href.split('/producto/')[1].split('-')[0]
-                            except:
-                                pass
-                                
-                    # Extract Old Price
-                    old_price_loc = card.locator('.product-card__price-offer')
-                    old_price = old_price_loc.inner_text().strip() if old_price_loc.count() > 0 else ""
-                    
-                    # Extract Image
-                    img_loc = card.locator('img.product-image__image')
-                    image_url = img_loc.first.get_attribute('src') if img_loc.count() > 0 else ""
-                    
-                    # Extract Discount Percentage
-                    discount_loc = card.locator('.offer .text')
-                    discount = discount_loc.inner_text().strip() if discount_loc.count() > 0 else ""
-                    
-                    if title and price:
-                        unique_id = sku if sku else title
-                        unique_products[unique_id] = {
-                            "Brand": brand,
-                            "Title": title,
-                            "Price": price,
-                            "Link": link,
-                            "SKU": sku,
-                            "OldPrice": old_price,
-                            "Image": image_url,
-                            "Discount": discount
+            # Extract currently visible products using JS (Massive memory saving)
+            js_extract = """
+            () => {
+                let results = [];
+                document.querySelectorAll('.product-card').forEach(card => {
+                    try {
+                        let title = card.querySelector('.product-card__title')?.innerText.trim() || "";
+                        let brand = card.querySelector('.product-card__brand')?.innerText.trim() || "";
+                        let price = card.querySelector('.product-card__price-value')?.innerText.trim() || "";
+                        let linkNode = card.querySelector('a.product-card__info-link');
+                        let href = linkNode ? linkNode.getAttribute('href') : "";
+                        let link = href ? "https://www.farmatodo.com.ve" + href : "";
+                        let sku = "";
+                        if (href && href.includes('/producto/')) {
+                            sku = href.split('/producto/')[1].split('-')[0];
                         }
-                except Exception as e:
-                    pass
+                        let oldPrice = card.querySelector('.product-card__price-offer')?.innerText.trim() || "";
+                        let imgNode = card.querySelector('img.product-image__image');
+                        let image = imgNode ? imgNode.getAttribute('src') : "";
+                        let discount = card.querySelector('.offer .text')?.innerText.trim() || "";
+                        
+                        if (title && price) {
+                            results.push({
+                                Brand: brand, Title: title, Price: price, Link: link,
+                                SKU: sku, OldPrice: oldPrice, Image: image, Discount: discount
+                            });
+                        }
+                    } catch(e) {}
+                });
+                return results;
+            }
+            """
+            products_chunk = page.evaluate(js_extract)
+            for p in products_chunk:
+                unique_id = p.get("SKU") if p.get("SKU") else p.get("Title")
+                unique_products[unique_id] = p
 
             current_height = page.evaluate('document.body.scrollHeight')
             page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
