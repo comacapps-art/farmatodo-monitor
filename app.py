@@ -107,6 +107,8 @@ def remove_watchlist():
     db_manager.remove_watchlist_item(doc_id)
     return jsonify({'status': 'ok'})
 
+import os
 if __name__ == '__main__':
-    # Run the server on port 5000
-    app.run(debug=True, port=5000)
+    # Run the server on Render's assigned port or 5000 locally
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)

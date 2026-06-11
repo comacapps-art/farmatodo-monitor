@@ -17,5 +17,5 @@ ENV PORT=5000
 # Exponer el puerto
 EXPOSE $PORT
 
-# Comando para iniciar gunicorn (el servidor web de producción para Flask)
-CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 300
+# Comando para iniciar el servidor web sin usar Gunicorn (ahorro masivo de memoria)
+CMD ["python", "app.py"]
