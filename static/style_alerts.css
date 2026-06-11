@@ -1,0 +1,53 @@
+@keyframes blinkGreen {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(16, 185, 129, 0.4); }
+  100% { background-color: transparent; }
+}
+
+@keyframes blinkRed {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(239, 68, 68, 0.4); }
+  100% { background-color: transparent; }
+}
+
+.blink-up {
+  animation: blinkRed 1.5s ease-in-out 3;
+}
+
+.blink-down {
+  animation: blinkGreen 1.5s ease-in-out 3;
+}
+
+.alert-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.alert-item img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.alert-item .details {
+  flex: 1;
+}
+
+.alert-item .price-change {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.price-up { color: #ef4444; }
+.price-down { color: #10b981; }
+
+.tab-panel {
+  display: none;
+}
+.tab-panel.active {
+  display: block;
+}
