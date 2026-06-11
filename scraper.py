@@ -20,7 +20,10 @@ def scrape_farmatodo(query: str, headless: bool = False):
     output_file = f"products_{timestamp}.csv"
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=headless)
+        browser = p.chromium.launch(
+            headless=headless,
+            args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--single-process"]
+        )
         page = browser.new_page(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         
         # Optimización extrema de memoria: Bloquear imágenes, fuentes y videos
