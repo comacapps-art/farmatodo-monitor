@@ -27,28 +27,28 @@ def get_product_price(sku):
     if not db: return 0
     doc = db.collection('products').document(sku).get()
     if doc.exists:
-        return doc.to_dict().get('price_val', 0)
-    return 0
-
 def get_product_info(sku):
     db = get_db()
-    if not db: return {'price_val': 0, 'last_checked': ''}
+    if not db: return {'price_val': 0, 'price_usd': 0, 'last_checked': ''}
     doc = db.collection('products').document(sku).get()
     if doc.exists:
         data = doc.to_dict()
         return {
             'price_val': data.get('price_val', 0),
+            'price_usd': data.get('price_usd', 0),
             'last_checked': data.get('last_checked', '')
         }
-    return {'price_val': 0, 'last_checked': ''}
+    return {'price_val': 0, 'price_usd': 0, 'last_checked': ''}
 
-def update_product_and_history(sku, product_data, current_price_val, old_price_val, old_timestamp, now_str):
+def update_product_and_history(sku, product_data, current_price_bs, current_price_usd, old_price_usd, old_timestamp, bcv_rate, now_str):
     db = get_db()
     if not db: return False
     
     # Update current price
     db.collection('products').document(sku).set({
-        'price_val': current_price_val,
+        'price_val': current_price_bs,
+        'price_usd': current_price_usd,
+        'bcv_rate': bcv_rate,
         'last_checked': now_str,
         'title': product_data.get('Title', ''),
         'brand': product_data.get('Brand', ''),
@@ -61,14 +61,17 @@ def update_product_and_history(sku, product_data, current_price_val, old_price_v
         'sku': sku,
         'title': product_data.get('Title', ''),
         'brand': product_data.get('Brand', ''),
-        'price_val': current_price_val,
+        'price_val': current_price_bs,
+        'price_usd': current_price_usd,
+        'bcv_rate': bcv_rate,
         'timestamp': now_str
     })
     
     changes_found = False
     
-    if old_price_val > 0 and old_price_val != current_price_val:
-        diff = current_price_val - old_price_val
+    # Solo alertar si el precio viejo en USD existe y es diferente al actual
+    if old_price_usd > 0 and old_price_usd != current_price_usd:
+        diff = current_price_usd - old_price_usd
         direction = 'up' if diff > 0 else 'down'
         
         # Save alert
@@ -77,8 +80,9 @@ def update_product_and_history(sku, product_data, current_price_val, old_price_v
             'old_timestamp': old_timestamp,
             'sku': sku,
             'title': product_data.get('Title'),
-            'old_price': old_price_val,
-            'new_price': current_price_val,
+            'old_price': old_price_usd,
+            'new_price': current_price_usd,
+            'bcv_rate': bcv_rate,
             'direction': direction,
             'image': product_data.get('Image')
         }

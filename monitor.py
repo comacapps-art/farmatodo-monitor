@@ -21,6 +21,21 @@ def _monitor_loop():
             
         print(f"[Monitor] Iniciando revisión de precios para: {current_query}")
         
+        bcv_rate = 0.0
+        try:
+            import requests
+            res = requests.get('https://ve.dolarapi.com/v1/dolares/oficial', timeout=10)
+            if res.status_code == 200:
+                bcv_rate = float(res.json().get('promedio', 0))
+                print(f"[Monitor] Tasa BCV obtenida: {bcv_rate}")
+        except Exception as e:
+            print(f"[Monitor] Error obteniendo tasa BCV: {e}")
+            
+        if bcv_rate <= 0:
+            print("[Monitor] No se pudo obtener la tasa BCV. Se omite el ciclo.")
+            time.sleep(60)
+            continue
+        
         try:
             # We run the scraper in a separate process because Playwright crashes inside Flask background threads
             import subprocess
@@ -46,20 +61,23 @@ def _monitor_loop():
                     import re
                     digits = re.sub(r'[^\d]', '', price_str)
                     if not digits: continue
-                    current_price_val = float(digits) / 100.0
+                    current_price_bs = float(digits) / 100.0
                 except:
                     continue
                     
+                # Calcular USD
+                current_price_usd = round(current_price_bs / bcv_rate, 2) if bcv_rate > 0 else 0
+                    
                 old_info = db_manager.get_product_info(sku)
-                old_price_val = old_info['price_val']
-                old_timestamp = old_info['last_checked']
+                old_price_usd = old_info.get('price_usd', 0)
+                old_timestamp = old_info.get('last_checked', '')
                 
                 changed = db_manager.update_product_and_history(
-                    sku, p, current_price_val, old_price_val, old_timestamp, now_str
+                    sku, p, current_price_bs, current_price_usd, old_price_usd, old_timestamp, bcv_rate, now_str
                 )
                 
                 if changed:
-                    print(f"[ALERTA] Cambio detectado en {sku}: {old_price_val} -> {current_price_val}")
+                    print(f"[ALERTA] Cambio detectado en {sku}: USD {old_price_usd} -> USD {current_price_usd}")
                 
         except Exception as e:
             print(f"[Monitor] Error: {e}")
