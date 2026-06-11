@@ -61,24 +61,33 @@ def stop_monitor():
 
 @app.route('/api/alerts', methods=['GET'])
 def get_alerts():
-    return jsonify({
-        'alerts': monitor.get_alerts(),
-        'status': monitor.get_status()
-    })
+    try:
+        return jsonify({
+            'alerts': monitor.get_alerts(),
+            'status': monitor.get_status()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 import db_manager
 
 @app.route('/api/history', methods=['GET'])
 def get_history():
-    return jsonify({
-        'history': db_manager.get_all_history()
-    })
+    try:
+        return jsonify({
+            'history': db_manager.get_all_history()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/watchlist', methods=['GET'])
 def get_watchlist():
-    return jsonify({
-        'watchlist': db_manager.get_watchlist()
-    })
+    try:
+        return jsonify({
+            'watchlist': db_manager.get_watchlist()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/watchlist/add', methods=['POST'])
 def add_watchlist():
