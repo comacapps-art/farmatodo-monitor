@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+.env
+monitor_temp.json
+firebase_credentials.json
+*.csv
