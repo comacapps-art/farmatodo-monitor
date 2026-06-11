@@ -23,5 +23,5 @@ jobs:
       env:
         SMTP_USER: ${{ secrets.SMTP_USER }}
         SMTP_PASS: ${{ secrets.SMTP_PASS }}
-        RECIPIENT_EMAIL: 'coordinador.inteligencia_neg@distrilabve.com'
+        RECIPIENT_EMAIL: 'coordinador.inteligencia_neg@elbombondorado.com'
       run: python daily_report.py
