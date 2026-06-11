@@ -23,11 +23,7 @@ def get_db():
     _db = firestore.client()
     return _db
 
-def get_product_price(sku):
-    db = get_db()
-    if not db: return 0
-    doc = db.collection('products').document(sku).get()
-    if doc.exists:
+
 def get_product_info(sku):
     db = get_db()
     if not db: return {'price_val': 0, 'price_usd': 0, 'last_checked': ''}
