@@ -23,6 +23,9 @@ def scrape_farmatodo(query: str, headless: bool = False):
         browser = p.chromium.launch(headless=headless)
         page = browser.new_page(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         
+        # Optimización extrema de memoria: Bloquear imágenes, fuentes y videos
+        page.route("**/*", lambda route: route.abort() if route.request.resource_type in ["image", "media", "font"] else route.continue_())
+        
         print(f"Navigating to {url} ...")
         page.goto(url, wait_until='domcontentloaded', timeout=90000)
         
