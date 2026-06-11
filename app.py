@@ -21,10 +21,9 @@ def scrape():
         # Fetch BCV rate
         bcv_rate = 0.0
         try:
-            import requests
-            res = requests.get('https://ve.dolarapi.com/v1/dolares/oficial', timeout=5)
-            if res.status_code == 200:
-                bcv_rate = float(res.json().get('promedio', 0))
+            rate_val, _ = db_manager.get_current_bcv_rate()
+            if rate_val > 0:
+                bcv_rate = rate_val
         except:
             pass
             
@@ -139,6 +138,28 @@ def get_dashboard():
     try:
         return jsonify({
             'dashboard': db_manager.get_dashboard_data()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/rates/save', methods=['POST'])
+def save_rate():
+    data = request.json
+    date_str = data.get('date')
+    rate_val = data.get('rate')
+    if not date_str or not rate_val:
+        return jsonify({'error': 'Falta fecha o tasa'}), 400
+    try:
+        db_manager.save_daily_rate(date_str, float(rate_val))
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/rates/history', methods=['GET'])
+def get_rates_history():
+    try:
+        return jsonify({
+            'rates': db_manager.get_rate_history()
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500

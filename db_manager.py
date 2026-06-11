@@ -157,3 +157,44 @@ def get_dashboard_data():
         data['sku'] = doc.id
         dashboard.append(data)
     return dashboard
+
+def save_daily_rate(date_str, rate_val):
+    db = get_db()
+    if not db: return False
+    db.collection('exchange_rates').document(date_str).set({
+        'rate': rate_val,
+        'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    })
+    return True
+
+def get_rate_history():
+    db = get_db()
+    if not db: return []
+    docs = db.collection('exchange_rates').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
+    rates = []
+    for doc in docs:
+        rates.append({
+            'date': doc.id,
+            'rate': doc.to_dict().get('rate', 0)
+        })
+    return rates
+
+def get_current_bcv_rate():
+    # 1. Check if there's a manual rate for today
+    today_str = datetime.datetime.now().strftime('%Y-%m-%d')
+    db = get_db()
+    if db:
+        doc = db.collection('exchange_rates').document(today_str).get()
+        if doc.exists:
+            return float(doc.to_dict().get('rate', 0)), 'manual'
+            
+    # 2. If not, fetch from API
+    try:
+        import requests
+        res = requests.get('https://ve.dolarapi.com/v1/dolares/oficial', timeout=10)
+        if res.status_code == 200:
+            return float(res.json().get('promedio', 0)), 'api'
+    except:
+        pass
+        
+    return 0, 'error'

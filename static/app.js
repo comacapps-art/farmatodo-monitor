@@ -362,8 +362,75 @@ document.addEventListener('DOMContentLoaded', () => {
       fetchAlerts();
   }, 60000);
 
+  // --- RATES LOGIC ---
+  const rateDateInput = document.getElementById('rateDateInput');
+  const rateValueInput = document.getElementById('rateValueInput');
+  const btnSaveRate = document.getElementById('btnSaveRate');
+  const ratesTableBody = document.getElementById('ratesTableBody');
+
+  // Set today's date as default
+  if (rateDateInput) {
+      const today = new Date().toISOString().split('T')[0];
+      rateDateInput.value = today;
+  }
+
+  async function loadRatesHistory() {
+      try {
+          const res = await fetch('/api/rates/history');
+          const data = await res.json();
+          ratesTableBody.innerHTML = '';
+          
+          if (data.rates && data.rates.length > 0) {
+              data.rates.forEach(item => {
+                  ratesTableBody.innerHTML += `
+                      <tr style="border-bottom:1px solid #f1f5f9;">
+                          <td style="padding:10px; font-weight:600;">${item.date}</td>
+                          <td style="padding:10px; color:#10b981; font-weight:bold;">Bs ${item.rate}</td>
+                      </tr>
+                  `;
+              });
+          } else {
+              ratesTableBody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:20px; color:#94a3b8;">No hay tasas registradas.</td></tr>';
+          }
+      } catch (e) {
+          console.error("Error loading rates history", e);
+      }
+  }
+
+  if (btnSaveRate) {
+      btnSaveRate.addEventListener('click', async () => {
+          const date = rateDateInput.value;
+          const rate = rateValueInput.value;
+          if (!date || !rate) {
+              alert('Por favor completa fecha y tasa');
+              return;
+          }
+          
+          btnSaveRate.disabled = true;
+          try {
+              const res = await fetch('/api/rates/save', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ date: date, rate: rate })
+              });
+              const data = await res.json();
+              if (data.status === 'ok') {
+                  alert('Tasa guardada correctamente');
+                  rateValueInput.value = '';
+                  loadRatesHistory();
+              } else {
+                  alert('Error al guardar: ' + data.error);
+              }
+          } catch (e) {
+              alert('Error de conexión');
+          }
+          btnSaveRate.disabled = false;
+      });
+  }
+
   // Load data on start
   loadWatchlist();
   loadHistory();
   loadDashboard();
+  loadRatesHistory();
 });

@@ -47,6 +47,7 @@
       </button>
       <button class="tab" data-tab="dashboard">📺 Dashboard TV</button>
       <button class="tab" data-tab="history">🕒 Historial</button>
+      <button class="tab" data-tab="rates">⚙️ Tasas BCV</button>
     </div>
 
     <!-- ══ TAB: BÚSQUEDA ══════════════════════════ -->
@@ -201,6 +202,45 @@
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+</div>
+
+<!-- TAB: TASAS BCV -->
+<div id="tab-rates" class="tab-panel">
+  <h3 style="font-size:16px; margin-top:0; color:#475569;">Configuración de Tasa Manual</h3>
+  <p style="font-size:13px; color:#64748b; margin-bottom: 20px;">
+    Si registras una tasa aquí para el día de hoy, el robot la utilizará como prioridad. Si no hay una tasa registrada, el robot buscará automáticamente la tasa en internet (API DolarVe).
+  </p>
+
+  <div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;">
+    <div style="display:flex; gap:10px; align-items:center;">
+      <div>
+        <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:5px;">Fecha:</label>
+        <input type="date" id="rateDateInput" class="input-field" style="width:150px;">
+      </div>
+      <div>
+        <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:5px;">Tasa BCV (Bs por USD):</label>
+        <input type="number" id="rateValueInput" class="input-field" step="0.01" placeholder="Ej: 36.52" style="width:150px;">
+      </div>
+      <div style="padding-top: 21px;">
+        <button id="btnSaveRate" class="btn">💾 Guardar Tasa</button>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="font-size:14px; color:#475569;">Historial de Tasas Registradas</h4>
+  <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; max-height:400px; overflow-y:auto;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size:13px;">
+      <thead style="background:#f8fafc;">
+        <tr>
+          <th style="padding: 10px; border-bottom:1px solid #e2e8f0;">Fecha</th>
+          <th style="padding: 10px; border-bottom:1px solid #e2e8f0;">Tasa Registrada (Bs)</th>
+        </tr>
+      </thead>
+      <tbody id="ratesTableBody">
+      </tbody>
+    </table>
+  </div>
+</div>
 </main>
 
 <script src="/static/app.js"></script>
