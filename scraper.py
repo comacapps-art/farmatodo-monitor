@@ -21,10 +21,10 @@ def scrape_farmatodo(query: str, headless: bool = False):
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=headless)
-        page = browser.new_page()
+        page = browser.new_page(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         
         print(f"Navigating to {url} ...")
-        page.goto(url, wait_until='domcontentloaded', timeout=60000)
+        page.goto(url, wait_until='domcontentloaded', timeout=90000)
         
         # Wait a bit for initial dynamic content to load
         page.wait_for_timeout(5000)
