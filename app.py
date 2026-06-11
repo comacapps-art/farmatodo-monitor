@@ -18,8 +18,8 @@ def scrape():
         return jsonify({'error': 'La búsqueda no puede estar vacía'}), 400
         
     try:
-        # Run the scraper
-        products, output_file = scraper.scrape_farmatodo(url)
+        # Run the scraper in headless mode for the server
+        products, output_file = scraper.scrape_farmatodo(url, headless=True)
         return jsonify({
             'message': 'Scraping completado', 
             'products': products,
