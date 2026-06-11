@@ -83,3 +83,43 @@ def get_alerts(limit=20):
     for doc in docs:
         alerts.append(doc.to_dict())
     return alerts
+
+def get_all_history():
+    db = get_db()
+    if not db: return []
+    
+    docs = db.collection('price_history').order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
+    history = []
+    for doc in docs:
+        history.append(doc.to_dict())
+    return history
+
+def get_watchlist():
+    db = get_db()
+    if not db: return []
+    
+    docs = db.collection('watchlist').order_by('added_at', direction=firestore.Query.DESCENDING).stream()
+    items = []
+    for doc in docs:
+        data = doc.to_dict()
+        data['id'] = doc.id
+        items.append(data)
+    return items
+
+def add_watchlist_item(term):
+    db = get_db()
+    if not db: return False
+    
+    now_str = time.strftime('%Y-%m-%d %H:%M:%S')
+    db.collection('watchlist').add({
+        'term': term,
+        'added_at': now_str
+    })
+    return True
+
+def remove_watchlist_item(doc_id):
+    db = get_db()
+    if not db: return False
+    
+    db.collection('watchlist').document(doc_id).delete()
+    return True

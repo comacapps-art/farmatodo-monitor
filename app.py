@@ -66,6 +66,38 @@ def get_alerts():
         'status': monitor.get_status()
     })
 
+import db_manager
+
+@app.route('/api/history', methods=['GET'])
+def get_history():
+    return jsonify({
+        'history': db_manager.get_all_history()
+    })
+
+@app.route('/api/watchlist', methods=['GET'])
+def get_watchlist():
+    return jsonify({
+        'watchlist': db_manager.get_watchlist()
+    })
+
+@app.route('/api/watchlist/add', methods=['POST'])
+def add_watchlist():
+    data = request.json
+    term = data.get('term')
+    if not term:
+        return jsonify({'error': 'Falta el término'}), 400
+    db_manager.add_watchlist_item(term)
+    return jsonify({'status': 'ok'})
+
+@app.route('/api/watchlist/remove', methods=['POST'])
+def remove_watchlist():
+    data = request.json
+    doc_id = data.get('id')
+    if not doc_id:
+        return jsonify({'error': 'Falta el ID'}), 400
+    db_manager.remove_watchlist_item(doc_id)
+    return jsonify({'status': 'ok'})
+
 if __name__ == '__main__':
     # Run the server on port 5000
     app.run(debug=True, port=5000)
